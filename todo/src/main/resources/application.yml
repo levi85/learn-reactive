@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: development
+---
+spring:
+  profiles: development
+  r2dbc:
+    url: r2dbc:pool:mssql://127.0.0.1:1433/demo
+    username: sa
+    password: P@ssw0rd
+  logging:
+    level: DEBUG
+---
+spring:
+  profiles: staging
+  r2dbc:
+    url: r2dbc:pool:mssql
+    username: {SA}
+    password: {SA}
