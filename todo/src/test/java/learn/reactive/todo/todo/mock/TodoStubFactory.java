@@ -11,4 +11,8 @@ public class TodoStubFactory {
     public static Todo Wash_Car() {
         return new Todo(null, "Wash Car", "Soap, Wash, vacuum", false);
     }
+
+    public static Todo Invalid_Buy_Grocereis(){
+        return new Todo(null, "Buy Groceries", "Milk, Bread", true);
+    }
 }

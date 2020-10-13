@@ -1,12 +1,10 @@
 package learn.reactive.todo.todo;
 
+import learn.reactive.todo.todo.exception.InvalidTodoItemException;
 import learn.reactive.todo.todo.mock.TodoStubFactory;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @AutoConfigureWebTestClient
 @ExtendWith(SpringExtension.class)
@@ -76,6 +73,7 @@ public class TodoIntegrationTest {
 
         Todo expectTodo = TodoStubFactory.Buy_Groceries();
         //act
+        //assert
         webTestClient.post().uri(TodoRouter.TODO_ENDPOINT_V1).contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newTodo), Todo.class)
                 .exchange()
@@ -85,7 +83,21 @@ public class TodoIntegrationTest {
                 .jsonPath("$.description").isEqualTo(expectTodo.getDescription())
                 .jsonPath("$.details").isEqualTo(expectTodo.getDetails())
                 .jsonPath("$.done").isEqualTo(expectTodo.isDone());
+    }
 
+    @Test
+    public void addTodo_givenTodoWithDoneIsFalse_ShouldThrowInvalidTodoItemException() {
+        //arrange
+        Todo invalidTodo = TodoStubFactory.Invalid_Buy_Grocereis();
+
+        //act
         //assert
+        webTestClient.post().uri(TodoRouter.TODO_ENDPOINT_V1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(invalidTodo), Todo.class)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo(new InvalidTodoItemException().getMessage());
     }
 }

@@ -1,5 +1,6 @@
 package learn.reactive.todo.todo;
 
+import learn.reactive.todo.todo.exception.InvalidTodoItemException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.MediaType;
@@ -33,6 +34,13 @@ public class TodoHandler {
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(newTodo.flatMap(todo -> todoRepository.save(todo)), Todo.class);
+                .body(newTodo
+                        .map(todo -> {
+                            if (todo.isDone() == true) {
+                                throw new InvalidTodoItemException();
+                            }
+                            return todo;
+                        })
+                        .flatMap(todo -> todoRepository.save(todo)), Todo.class);
     }
 }
