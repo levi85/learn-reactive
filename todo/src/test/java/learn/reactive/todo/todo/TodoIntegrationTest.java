@@ -100,4 +100,22 @@ public class TodoIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo(new InvalidTodoItemException().getMessage());
     }
+
+
+    @Test
+    public void updateTodo_givenExistingTodoWithDone_shouldUpdateTodo() {
+        //arrange
+        Todo existingTodo = todoRepository.findById(1).block();
+
+        existingTodo.setDone(true);
+
+        //act and assert
+        webTestClient.put().uri(TodoRouter.TODO_ENDPOINT_V1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(existingTodo), Todo.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.done").isEqualTo(true);
+    }
 }

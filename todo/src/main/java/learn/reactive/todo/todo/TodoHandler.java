@@ -18,6 +18,8 @@ public class TodoHandler {
 
     private final TodoRepository todoRepository;
 
+    private final TodoService todoService;
+
     public Mono<ServerResponse> getAllItems(ServerRequest serverRequest) {
 
         return  ServerResponse.ok()
@@ -42,5 +44,15 @@ public class TodoHandler {
                             return todo;
                         })
                         .flatMap(todo -> todoRepository.save(todo)), Todo.class);
+    }
+
+    public Mono<ServerResponse> updateTodo(ServerRequest serverRequest) {
+
+        Mono<Todo> reqTodo = serverRequest.bodyToMono(Todo.class);
+
+
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(reqTodo.flatMap(todo -> todoService.updateTodo(todo)), Todo.class);
     }
 }
