@@ -6,7 +6,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.r2dbc.connectionfactory.init.ConnectionFactoryInitializer;
 import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePopulator;
 
-@Configuration
+//@Configuration
 public class DatabaseInit extends ConnectionFactoryInitializer {
     public DatabaseInit(ConnectionFactory connectionFactory) {
         this.setConnectionFactory(connectionFactory);

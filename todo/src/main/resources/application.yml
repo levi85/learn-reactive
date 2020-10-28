@@ -13,6 +13,15 @@ spring:
     password: P@ssw0rd
   logging:
     level: DEBUG
+  rabbitmq:
+    addresses: localhost:5672
+  cloud:
+    stream:
+      bindings:
+        echo-in-1:
+          destination: oc
+        echo-out-1:
+          destination: oc
 ---
 spring:
   profiles: staging
