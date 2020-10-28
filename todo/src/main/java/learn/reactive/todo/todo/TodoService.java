@@ -15,4 +15,8 @@ public class TodoService {
         return todoRepository.save(reqUpdateTodo);
 
     }
+
+    public String getMessage() {
+        return "HelloWorld";
+    }
 }

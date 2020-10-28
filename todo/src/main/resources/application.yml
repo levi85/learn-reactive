@@ -15,13 +15,11 @@ spring:
     level: DEBUG
   rabbitmq:
     addresses: localhost:5672
-  cloud:
-    stream:
-      bindings:
-        echo-in-1:
-          destination: oc
-        echo-out-1:
-          destination: oc
+#  cloud:
+#    stream:
+#      bindings:
+#        echo:
+#          destination: oc
 ---
 spring:
   profiles: staging

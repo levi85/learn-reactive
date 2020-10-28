@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @SpringBootApplication
 public class TodoApplication {
@@ -13,9 +14,8 @@ public class TodoApplication {
 		SpringApplication.run(TodoApplication.class, args);
 	}
 
-	@Bean
-	public Function<String, String> echo() {
-		return value -> value;
-	}
+
+
+
 
 }
