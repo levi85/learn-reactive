@@ -1,9 +1,9 @@
 server:
   port: 8080
 
-spring:
-  profiles:
-    active: development
+#spring:
+#  profiles:
+#    active: development
 ---
 spring:
   profiles: development
@@ -14,16 +14,22 @@ spring:
   logging:
     level: DEBUG
   rabbitmq:
-    addresses: localhost:5672
-#  cloud:
-#    stream:
-#      bindings:
-#        echo:
-#          destination: oc
+    addresses: 127.0.0.1:5672
+  cloud:
+    stream:
+      function:
+        definition: broadcast;receiver
+      bindings:
+        broadcast-out-0:
+          destination: oc
+        receiver-in-0:
+          destination: oc
 ---
 spring:
   profiles: staging
   r2dbc:
-    url: r2dbc:pool:mssql
-    username: {SA}
-    password: {SA}
+    url: r2dbc:pool:mssql://127.0.0.1:1433/demo
+    username: sa
+    password: P@ssw0rd
+  logging:
+    level: DEBUG

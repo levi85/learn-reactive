@@ -18,7 +18,8 @@ public class TodoRouter {
         return RouterFunctions
                 .route(GET(TodoRouter.TODO_ENDPOINT_V1).and(accept(MediaType.APPLICATION_JSON)), todoHandler::getAllItems)
                 .andRoute(POST(TodoRouter.TODO_ENDPOINT_V1).and(accept(MediaType.APPLICATION_JSON)), todoHandler::newTodo)
-                .andRoute(PUT(TodoRouter.TODO_ENDPOINT_V1).and(accept(MediaType.APPLICATION_JSON)), todoHandler::updateTodo);
+                .andRoute(PUT(TodoRouter.TODO_ENDPOINT_V1).and(accept(MediaType.APPLICATION_JSON)), todoHandler::updateTodo)
+                .andRoute(GET(TodoRouter.TODO_ENDPOINT_V1 + "/test").and(accept(MediaType.APPLICATION_JSON)), todoHandler::createMessage);
     }
 
 

@@ -55,4 +55,11 @@ public class TodoHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(reqTodo.flatMap(todo -> todoService.updateTodo(todo)), Todo.class);
     }
+
+    public Mono<ServerResponse> createMessage(ServerRequest serverRequest) {
+
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(todoService.getMessage(), String.class);
+    }
 }

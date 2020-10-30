@@ -8,7 +8,13 @@ import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.SerializationUtils;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,14 +40,43 @@ public class TodoPublisherTest {
         try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
                 TestChannelBinderConfiguration.getCompleteConfiguration(
                         TodoApplication.class))
-                .profiles("development")
+                .profiles("staging")
                 .run("--spring.cloud.function.definition=broadcast")) {
 
 
-            TodoPublisher todoPublisher = context.getBean(TodoPublisher.class);
-
+            TodoService todoService = context.getBean(TodoService.class);
             OutputDestination target = context.getBean(OutputDestination.class);
-            assertThat(target.receive().getPayload()).isEqualTo("HelloWorld".getBytes());
+
+            Flux<String> result = todoService.getMessage();
+
+            result.blockFirst();
+
+            todoService.stringEmitterProcessor.doOnNext(message -> {
+                assertThat(target.receive().getPayload()).isEqualTo("HelloWorld".getBytes());
+            });
         }
     }
+
+
+    @Test
+    public void broadcastNewTodoTest() {
+        try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
+                TestChannelBinderConfiguration.getCompleteConfiguration(
+                        TodoApplication.class))
+                .profiles("development")
+                .run("--spring.cloud.function.definition=broadcastNewTodo")) {
+
+
+            Todo newTodoStub = new Todo(null, "dummy desc", "dummy details", false);
+            Todo expectedSavedTodo = new Todo(1, "dummy desc", "dummy details", false);
+
+            TodoService todoService = context.getBean(TodoService.class);
+            OutputDestination target = context.getBean(OutputDestination.class);
+
+            todoService.createTodo(newTodoStub).block();
+
+            assertThat(target.receive().getPayload()).isEqualTo(expectedSavedTodo);
+        }
+    }
+
 }
