@@ -28,9 +28,11 @@ public class TodoPublisher {
     @Autowired
     TodoService todoService;
 
-    @Autowired
-    EmitterProcessor<Todo> emitterProcessor;
+//    @Autowired
+//    EmitterProcessor<Todo> emitterProcessor;
 
+    @Autowired
+    EmitterProcessor<String> stringEmitterProcessor;
 
     @Bean
 	public Function<String, String> echo() {
@@ -40,5 +42,15 @@ public class TodoPublisher {
     @Bean
     public Consumer<String> receiver() {
         return message -> System.out.println(message);
+    }
+
+    @Bean
+    public Supplier<Flux<String>> broadcast() {
+        return () -> {
+
+//            return stringEmitterProcessor;
+
+            return Flux.interval(Duration.ofSeconds(1)).map(value -> "Hello " + value);
+        };
     }
 }

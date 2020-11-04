@@ -16,9 +16,15 @@ public class TodoApplication {
 		SpringApplication.run(TodoApplication.class, args);
 	}
 
+//	@Bean
+//	public EmitterProcessor<Todo> emitterProcessorBean() {
+//		return EmitterProcessor.create();
+//	}
+
 	@Bean
-	public EmitterProcessor<Todo> emitterProcessorBean() {
+	public EmitterProcessor<String> stringEmitterProcessor() {
 		return EmitterProcessor.create();
 	}
+
 
 }

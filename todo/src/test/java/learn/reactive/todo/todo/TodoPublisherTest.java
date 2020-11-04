@@ -45,13 +45,14 @@ public class TodoPublisherTest {
 
 
             TodoService todoService = context.getBean(TodoService.class);
+            EmitterProcessor<String> stringEmitterProcessor = context.getBean(EmitterProcessor.class);
             OutputDestination target = context.getBean(OutputDestination.class);
 
             Flux<String> result = todoService.getMessage();
 
             result.blockFirst();
 
-            todoService.stringEmitterProcessor.doOnNext(message -> {
+            stringEmitterProcessor.doOnNext(message -> {
                 assertThat(target.receive().getPayload()).isEqualTo("HelloWorld".getBytes());
             });
         }
