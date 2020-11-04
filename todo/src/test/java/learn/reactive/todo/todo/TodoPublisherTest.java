@@ -9,12 +9,18 @@ import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.SerializationUtils;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,12 +42,12 @@ public class TodoPublisherTest {
     }
 
     @Test
-    public void broadcastTest() {
+    public void broadcastTest() throws InterruptedException {
         try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
                 TestChannelBinderConfiguration.getCompleteConfiguration(
                         TodoApplication.class))
                 .profiles("staging")
-                .run("--spring.cloud.function.definition=broadcast")) {
+                .run()) {
 
 
             TodoService todoService = context.getBean(TodoService.class);
@@ -49,34 +55,34 @@ public class TodoPublisherTest {
             OutputDestination target = context.getBean(OutputDestination.class);
 
             Flux<String> result = todoService.getMessage();
-
-            result.blockFirst();
-
-            stringEmitterProcessor.doOnNext(message -> {
-                assertThat(target.receive().getPayload()).isEqualTo("HelloWorld".getBytes());
-            });
+            Thread.sleep(2000);
+            assertThat(target.receive(0,0).getPayload()).isEqualTo("HelloWorld".getBytes());
         }
     }
 
 
     @Test
-    public void broadcastNewTodoTest() {
+    public void broadcastTodoTest() throws InterruptedException, IOException, ClassNotFoundException {
         try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
                 TestChannelBinderConfiguration.getCompleteConfiguration(
                         TodoApplication.class))
                 .profiles("development")
-                .run("--spring.cloud.function.definition=broadcastNewTodo")) {
+                .run()) {
 
-
-            Todo newTodoStub = new Todo(null, "dummy desc", "dummy details", false);
-            Todo expectedSavedTodo = new Todo(1, "dummy desc", "dummy details", false);
 
             TodoService todoService = context.getBean(TodoService.class);
             OutputDestination target = context.getBean(OutputDestination.class);
 
-            todoService.createTodo(newTodoStub).block();
+            todoService.syncTodo().subscribe();
 
-            assertThat(target.receive().getPayload()).isEqualTo(expectedSavedTodo);
+            todoService.todoEmitterProcessor.doOnNext(todo -> {
+                System.out.println("Todo idX: " + todo.getId());
+                System.out.println("Strange....");
+            }).subscribe();
+
+            Thread.sleep(3000);
+
+            assertThat(target.receive(0, 1).getPayload()).isNotEmpty();
         }
     }
 

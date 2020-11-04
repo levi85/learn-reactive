@@ -1,9 +1,9 @@
 server:
   port: 8080
 
-#spring:
-#  profiles:
-#    active: development
+spring:
+  profiles:
+    active: development
 ---
 spring:
   profiles: development
@@ -18,10 +18,12 @@ spring:
   cloud:
     stream:
       function:
-        definition: broadcast;receiver
+        definition: broadcast;receiver;broadcastTodo
       bindings:
         broadcast-out-0:
           destination: oc
+        broadcastTodo-out-0:
+          destination: tbc
         receiver-in-0:
           destination: oc
 ---

@@ -17,13 +17,6 @@ import java.util.function.Supplier;
 
 @Configuration
 public class TodoPublisher {
-//    @Bean
-//    public Supplier<String> echo() {
-//
-//        String messageToOutput = "hello";
-//
-//        return () -> messageToOutput;
-//    }
 
     @Autowired
     TodoService todoService;
@@ -48,9 +41,9 @@ public class TodoPublisher {
     public Supplier<Flux<String>> broadcast() {
         return () -> {
 
-//            return stringEmitterProcessor;
+            return stringEmitterProcessor;
 
-            return Flux.interval(Duration.ofSeconds(1)).map(value -> "Hello " + value);
+//            return Flux.interval(Duration.ofSeconds(1)).map(value -> "Hello " + value);
         };
     }
 }

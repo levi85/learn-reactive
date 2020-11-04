@@ -1,31 +1,25 @@
 package learn.reactive.todo.todo;
 
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.FluxSink;
 
-import java.time.Duration;
 import java.util.function.Supplier;
 
 @Service
-//@AllArgsConstructor
 public class TodoService {
 
     final TodoRepository todoRepository;
-    EmitterProcessor<Todo> emitterProcessor = EmitterProcessor.create();
+    EmitterProcessor<Todo> todoEmitterProcessor = EmitterProcessor.create();
 
 
     @Autowired
     EmitterProcessor<String> stringEmitterProcessor;
-
-    Sinks stringSinks = Sinks.many().multicast().onBackpressureBuffer();
 
 
     public TodoService(TodoRepository todoRepository) {
@@ -44,12 +38,30 @@ public class TodoService {
         Mono<Todo> savedTodo = todoRepository.save(newItem);
 
         return savedTodo
-                .doOnNext(todo -> emitterProcessor.onNext(todo));
+                .doOnNext(todo -> todoEmitterProcessor.onNext(todo));
+    }
+
+    public Flux<Todo> syncTodo() {
+        return Flux.range(1, 20)
+                .flatMap(value -> todoRepository.save(new Todo(null, "Sample Todo Desc" + value, "some deatils " + value, false))
+                        .doOnNext(savedTodo -> todoEmitterProcessor.onNext(savedTodo)))
+                .log();
     }
 
     @Bean
-    public Supplier<Flux<Todo>> broadcastNewTodo() {
-        return () -> Flux.just(new Todo(1, "dummy desc", "dummy details", false));
+    public Supplier<Flux<Todo>> broadcastTodo() {
+        return () -> todoEmitterProcessor;
+    }
+
+    @Bean
+    public ApplicationRunner smallRunner() {
+        return new ApplicationRunner() {
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                syncTodo().subscribe();
+                todoEmitterProcessor.doOnNext(todo -> System.out.println("Emitter working " + todo.getId())).subscribe();
+            }
+        };
     }
 
     public Flux<String> getMessage() {
